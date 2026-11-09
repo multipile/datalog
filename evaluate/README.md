@@ -24,7 +24,10 @@ Both sides are bound, as for `=`.
 A host declares its relations in a `Database`. For each relation it gives a
 name, what its columns are called, and who the relation belongs to. Then it
 adds the rows: as symbols with `add`, or as values, integers among them,
-with `add_values`.
+with `add_values`. Adding a row to a relation that was never declared, or a
+row with a number of values other than the relation's columns, panics at
+that call. That is a mistake in the host, not in a program, so it is not
+left for `evaluate` to find.
 
 `evaluate` then takes three things:
 

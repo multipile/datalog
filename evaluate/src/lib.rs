@@ -99,23 +99,40 @@ impl Database {
     }
 
     /// Adds one row of symbols to a declared relation.
+    ///
+    /// # Panics
+    ///
+    /// If the relation was never declared, or the row has a number of values
+    /// other than the relation's columns. Either would leave the database
+    /// holding a row no program could be evaluated against.
     pub fn add(&mut self, name: &str, row: &[&str]) {
-        let t: Tuple = row
-            .iter()
-            .map(|s| self.intern(Value::Symbol(s.to_string())))
-            .collect();
-        let held = self.relations.get_mut(name).expect("declared first");
-        debug_assert_eq!(held.columns.len(), t.len());
-        held.rows.push(t);
+        let row: Vec<Value> = row.iter().map(|s| Value::Symbol(s.to_string())).collect();
+        self.add_values(name, &row);
     }
 
     /// Adds one row of values to a declared relation: what [`Database::add`]
     /// does, for a host whose rows hold integers as well as symbols.
+    ///
+    /// # Panics
+    ///
+    /// As [`Database::add`] does.
     pub fn add_values(&mut self, name: &str, row: &[Value]) {
+        let Some(held) = self.relations.get(name) else {
+            panic!("{name} is not declared: declare a relation before adding rows to it");
+        };
+        assert_eq!(
+            held.columns.len(),
+            row.len(),
+            "{name} has {} columns, and a row of {} values was added to it",
+            held.columns.len(),
+            row.len(),
+        );
         let t: Tuple = row.iter().map(|v| self.intern(v.clone())).collect();
-        let held = self.relations.get_mut(name).expect("declared first");
-        debug_assert_eq!(held.columns.len(), t.len());
-        held.rows.push(t);
+        self.relations
+            .get_mut(name)
+            .expect("checked above")
+            .rows
+            .push(t);
     }
 
     pub fn relations(&self) -> &BTreeMap<String, Held> {
@@ -123,8 +140,15 @@ impl Database {
     }
 
     /// A relation's rows as values, sorted column by column.
+    ///
+    /// # Panics
+    ///
+    /// If the database holds no relation of that name.
     pub fn rows(&self, name: &str) -> Vec<Vec<Value>> {
-        let mut rows: Vec<Vec<Value>> = self.relations[name]
+        let Some(held) = self.relations.get(name) else {
+            panic!("{name} is not a relation the database holds");
+        };
+        let mut rows: Vec<Vec<Value>> = held
             .rows
             .iter()
             .map(|t| t.iter().map(|&i| self.values[i as usize].clone()).collect())

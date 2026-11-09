@@ -323,3 +323,30 @@ fn values_compare_in_the_order_an_answer_sorts_in() {
     assert_eq!(got[3], rows(&[&["2", "10"]]));
     assert_eq!(got[4], rows(&[]));
 }
+
+#[test]
+#[should_panic(expected = "edge has 2 columns, and a row of 1 values was added to it")]
+fn a_row_of_the_wrong_width_is_refused_when_it_is_added() {
+    let mut db = graph();
+    db.add("edge", &["a"]);
+}
+
+#[test]
+#[should_panic(expected = "edge has 2 columns, and a row of 3 values was added to it")]
+fn a_row_of_values_of_the_wrong_width_is_refused_when_it_is_added() {
+    let mut db = graph();
+    db.add_values("edge", &[sym("a"), sym("b"), Value::Integer(1)]);
+}
+
+#[test]
+#[should_panic(expected = "path is not declared")]
+fn a_row_for_a_relation_never_declared_is_refused() {
+    let mut db = graph();
+    db.add("path", &["a", "b"]);
+}
+
+#[test]
+#[should_panic(expected = "path is not a relation the database holds")]
+fn rows_of_a_relation_the_database_does_not_hold_are_refused() {
+    graph().rows("path");
+}
