@@ -1,0 +1,39 @@
+title = "Programs as layers"
+readme = "Evaluating"
+description = "What a program defines stays in the database, so the next program can use it, and nothing a later program does changes what an earlier one derived. What a query derives does not stay."
+
+[[case]]
+name = "a later program reads what an earlier one defined"
+programs = [
+  '''
+  edge(a, b). edge(b, c).
+  path(X, Y) :- edge(X, Y).
+  path(X, Z) :- path(X, Y), edge(Y, Z).
+  ''',
+  '?- path(a, Z).',
+]
+answers = [[["b"], ["c"]]]
+
+[[case]]
+name = "a later program cannot define again what an earlier one did"
+programs = [
+  'p(a).',
+  'p(b).',
+]
+refused = { stage = "evaluate", at = "1:1", says = "p is the case's, and is not defined again" }
+
+[[case]]
+name = "a later program cannot add a rule to an earlier relation"
+programs = [
+  'p(a). q(b).',
+  'p(X) :- q(X).',
+]
+refused = { stage = "evaluate", says = "p is the case's, and is not defined again" }
+
+[[case]]
+name = "each program's queries are answered, in order"
+programs = [
+  'p(a). ?- p(X).',
+  'q(b). ?- q(X). ?- p(X).',
+]
+answers = [[["a"]], [["b"]], [["a"]]]

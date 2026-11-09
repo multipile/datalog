@@ -1,0 +1,114 @@
+title = "Comparisons"
+readme = "Comparisons"
+description = "= and != say whether two values are the same. <, <=, > and >= compare in the order values sort in: integers by value, before every symbol, then symbols by their text."
+
+[[case]]
+name = "= keeps the bindings where two values are the same"
+program = '''
+edge(a, b). edge(c, c).
+?- edge(X, Y), X = Y.
+?- edge(X, Y), Y = b.
+'''
+answers = [[["c", "c"]], [["a", "b"]]]
+
+[[case]]
+name = "!= keeps the bindings where two values differ"
+program = '''
+edge(a, b). edge(c, c).
+?- edge(X, Y), X != Y.
+'''
+answers = [[["a", "b"]]]
+
+[[case]]
+name = "< <= > >= compare integers by value"
+program = '''
+n(1). n(2). n(3).
+?- n(X), X < 2.
+?- n(X), X <= 2.
+?- n(X), X > 2.
+?- n(X), X >= 2.
+'''
+answers = [[[1]], [[1], [2]], [[3]], [[2], [3]]]
+
+[[case]]
+name = "integers compare as numbers, not as text"
+program = '''
+n(9). n(10).
+?- n(X), X > 9.
+'''
+answers = [[[10]]]
+
+[[case]]
+name = "two variables compare with each other"
+program = '''
+n(1). n(2). n(3).
+?- n(X), n(Y), X < Y, Y <= 2.
+'''
+answers = [[[1, 2]]]
+
+[[case]]
+name = "a value may be on the left"
+program = '''
+n(1). n(5).
+?- n(X), 2 < X.
+'''
+answers = [[[5]]]
+
+[[case]]
+name = "every symbol is greater than every integer"
+program = '''
+w(1000). w(a).
+?- w(X), X > 999.
+'''
+answers = [[[1000], ["a"]]]
+note = "Soufflé's types refuse this before evaluation. This language has no types, so it compares in the order an answer already sorts in."
+
+[[case]]
+name = "symbols compare by their text"
+program = '''
+w(apple). w(banana). w(cherry).
+?- w(X), X >= banana, X < cherry.
+?- w(X), X < "B".
+'''
+answers = [[["banana"]], []]
+note = "\"B\" sorts before every lowercase letter, so nothing is less than it here."
+
+[[case]]
+name = "a comparison of two values is decided once"
+program = '''
+n(1).
+?- n(X), 1 < 2.
+?- n(X), 2 < 1.
+?- n(X), a = a.
+'''
+answers = [[[1]], [], [[1]]]
+
+[[case]]
+name = "a name directly before a comparison is a symbol, not a relation"
+program = '''
+w(a). w(b).
+?- w(X), a != X.
+?- w(X), b < X.
+'''
+answers = [[["b"]], []]
+
+[[case]]
+name = "_ in a comparison is refused"
+program = '''
+?- q(X), X < _.
+'''
+refused = { stage = "parse", at = "1:14", says = "_ in a comparison is equal to anything" }
+
+[[case]]
+name = "a compared variable nothing binds is refused"
+program = '''
+?- q(X), X >= Y.
+'''
+refused = { stage = "parse", at = "1:15", says = "Y is compared and no atom that is not negated binds it" }
+
+[[case]]
+name = "a comparison is not a body's only literal"
+program = '''
+?- a = a.
+'''
+refused = { stage = "parse", says = "a body needs an atom that is not negated" }

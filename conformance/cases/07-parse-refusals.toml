@@ -1,0 +1,112 @@
+title = "What parse refuses"
+readme = "What is refused"
+description = "parse refuses the first mistake it finds, with the line and the column, counted in characters, that it is at."
+
+[[case]]
+name = "a clause without its full stop"
+program = 'p(a)'
+refused = { stage = "parse", at = "1:5", says = "expected \".\", \":-\" or \"?-\", found the end of the program" }
+
+[[case]]
+name = "empty parentheses"
+program = 'p().'
+refused = { stage = "parse", at = "1:3", says = "expected a term" }
+
+[[case]]
+name = "a character that is not part of the language"
+program = 'p(a) & q(b).'
+refused = { stage = "parse", at = "1:6", says = "is not part of the language" }
+
+[[case]]
+name = "a string left open"
+program = 'p("abc).'
+refused = { stage = "parse", at = "1:3", says = "a string is not closed" }
+
+[[case]]
+name = "an escape that is not one of the four"
+program = 'p("a\qb").'
+refused = { stage = "parse", at = "1:5", says = "a string escapes only" }
+
+[[case]]
+name = "an integer that does not fit in 64 bits"
+program = 'p(9223372036854775808).'
+refused = { stage = "parse", at = "1:3", says = "does not fit in 64 bits" }
+
+[[case]]
+name = "a number running into a letter"
+program = 'p(12ab).'
+refused = { stage = "parse", at = "1:3", says = "12 is followed by a letter" }
+
+[[case]]
+name = "an @ with no name after it"
+program = '?- p(@).'
+refused = { stage = "parse", at = "1:6", says = "@ is followed by the name it refers to" }
+
+[[case]]
+name = "a variable in a fact"
+program = 'p(X).'
+refused = { stage = "parse", at = "1:3", says = "X in a fact" }
+
+[[case]]
+name = "_ in a fact"
+program = 'p(_).'
+refused = { stage = "parse", at = "1:3", says = "_ in a fact of p" }
+
+[[case]]
+name = "_ in a rule's head"
+program = 'p(X, _) :- q(X).'
+refused = { stage = "parse", at = "1:6", says = "_ in the head of p" }
+
+[[case]]
+name = "a head variable no atom in the body binds"
+program = 'p(X, Y) :- q(X).'
+refused = { stage = "parse", at = "1:6", says = "Y is in the head of p and no atom that is not negated in its body binds it" }
+
+[[case]]
+name = "a head variable only a negation mentions"
+program = 'p(X) :- q(Y), !r(X).'
+refused = { stage = "parse", says = "negated" }
+
+[[case]]
+name = "a relation written with two numbers of terms"
+program = '''
+p(a).
+q(X) :- p(X, Y).
+'''
+refused = { stage = "parse", at = "2:9", says = "p is written with 2 terms here and 1 term at 1:1" }
+
+[[case]]
+name = "a named query's parameter that is a value"
+program = 'into(a) ?- edge(a, b).'
+refused = { stage = "parse", says = "is a parameter of into, and a parameter is a variable" }
+
+[[case]]
+name = "a named query's parameter written twice"
+program = 'pair(X, X) ?- edge(X, Y).'
+refused = { stage = "parse", says = "X is a parameter of pair twice" }
+
+[[case]]
+name = "a named query's parameter its body does not bind"
+program = 'into(Y) ?- edge(a, b).'
+refused = { stage = "parse", says = "Y is a parameter of into and no atom that is not negated in its body binds it" }
+
+[[case]]
+name = "two queries with one name"
+program = '''
+q(X) ?- p(X).
+q(X) ?- r(X).
+'''
+refused = { stage = "parse", at = "2:1", says = "a query is named q here and at 1:1: a name is one question" }
+
+[[case]]
+name = "only the first mistake is reported"
+program = '''
+p(X).
+q(Y).
+'''
+refused = { stage = "parse", at = "1:3", says = "X in a fact" }
+
+[[case]]
+name = "columns are counted in characters, not bytes"
+program = 'p("é", X).'
+refused = { stage = "parse", at = "1:8", says = "X in a fact" }

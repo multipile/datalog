@@ -1,0 +1,57 @@
+title = "Doc comments"
+readme = "Doc comments"
+description = "%% first on its line begins a doc comment, which belongs to the clause on the line directly under it. A doc comment that documents nothing is refused."
+
+[[case]]
+name = "a doc comment above a clause is read, and the clause is evaluated"
+program = '''
+%% Two nodes one edge apart.
+%% The edge's direction kept.
+near(a, b).
+?- near(X, Y).
+'''
+answers = [[["a", "b"]]]
+
+[[case]]
+name = "%% after something on its line is a plain comment"
+program = '''
+p(a). %% not a doc comment
+
+?- p(X).
+'''
+answers = [[["a"]]]
+
+[[case]]
+name = "a doc comment with a blank line under it is refused"
+program = '''
+%% a row of p
+
+p(a).
+'''
+refused = { stage = "parse", at = "1:1", says = "a doc comment documents the clause on the line directly under it, and there is none" }
+
+[[case]]
+name = "a doc comment at the end of the program is refused"
+program = '''
+p(a).
+%% nothing under this
+'''
+refused = { stage = "parse", at = "2:1", says = "documents the clause on the line directly under it" }
+
+[[case]]
+name = "a doc comment whose first line is empty is refused"
+program = '''
+%%
+%% the title came too late
+p(a).
+'''
+refused = { stage = "parse", at = "1:1", says = "a doc comment begins with its title" }
+
+[[case]]
+name = "a doc comment inside a clause is refused"
+program = '''
+p(X) :-
+  %% inside
+  q(X).
+'''
+refused = { stage = "parse", says = "found a doc comment" }

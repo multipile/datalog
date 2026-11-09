@@ -1,0 +1,53 @@
+title = "What Soufflé has and this language does not"
+readme = "Grammar"
+description = "The language writes :-, !, = and != the way Soufflé does, and takes nothing else of Soufflé's. Each case here is something a Soufflé program says that this language refuses."
+
+[[case]]
+name = "a declaration is refused"
+program = '''
+.decl edge(x: symbol, y: symbol)
+'''
+refused = { stage = "parse", at = "1:13", says = "':' is not part of the language" }
+note = "A relation here has no declaration. Its columns are its terms, and the host names a held relation's columns. The first mistake reported is the first character the language has no use for."
+
+[[case]]
+name = "a // comment is refused"
+program = '''
+// a comment in Soufflé
+p(a).
+'''
+refused = { stage = "parse", at = "1:1", says = "is not part of the language" }
+note = "Comments here begin with %."
+
+[[case]]
+name = "arithmetic is refused"
+program = '''
+n(1).
+?- n(X), Y = X + 1.
+'''
+refused = { stage = "parse", says = "is not part of the language" }
+
+[[case]]
+name = "a functor in a term is refused"
+program = '''
+n(1).
+?- n(X), Y = cat("a", "b").
+'''
+refused = { stage = "parse", says = "expected \",\" or \".\"" }
+
+[[case]]
+name = "an aggregate is refused"
+program = '''
+node(a). edge(a, b).
+?- node(X), N = count : { edge(X, _) }.
+'''
+refused = { stage = "parse", at = "2:23", says = "':' is not part of the language" }
+note = "The language has no aggregates. A host that needs a count derives it from the answer's rows, or holds it as a relation of its own."
+
+[[case]]
+name = "a disjunction in a body is refused"
+program = '''
+a(1). b(2).
+?- a(X) ; b(X).
+'''
+refused = { stage = "parse", says = "is not part of the language" }
