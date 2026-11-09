@@ -1,0 +1,87 @@
+title = "Recursion"
+readme = "Evaluating"
+description = "A recursive relation is evaluated to its fixed point: through cycles, through more than one rule, and through relations that stand on each other."
+
+[[case]]
+name = "a transitive closure reaches every node"
+program = '''
+edge(a, b). edge(b, c). edge(c, d).
+path(X, Y) :- edge(X, Y).
+path(X, Z) :- path(X, Y), edge(Y, Z).
+?- path(a, Y).
+'''
+answers = [[["b"], ["c"], ["d"]]]
+
+[[case]]
+name = "a recursion through a cycle ends at its fixed point"
+program = '''
+edge(a, b). edge(b, c). edge(c, a). edge(c, d).
+path(X, Y) :- edge(X, Y).
+path(X, Z) :- path(X, Y), edge(Y, Z).
+?- path(X, X).
+?- path(d, Y).
+'''
+answers = [[["a"], ["b"], ["c"]], []]
+
+[[case]]
+name = "a recursion written right to left reaches the same rows"
+program = '''
+edge(a, b). edge(b, c).
+path(X, Y) :- edge(X, Y).
+path(X, Z) :- edge(X, Y), path(Y, Z).
+?- path(X, Y).
+'''
+answers = [[["a", "b"], ["a", "c"], ["b", "c"]]]
+
+[[case]]
+name = "a doubly recursive rule reaches the same rows"
+program = '''
+edge(a, b). edge(b, c). edge(c, d).
+path(X, Y) :- edge(X, Y).
+path(X, Z) :- path(X, Y), path(Y, Z).
+?- path(a, Y).
+'''
+answers = [[["b"], ["c"], ["d"]]]
+
+[[case]]
+name = "two relations defined by each other are evaluated together"
+program = '''
+next(0, 1). next(1, 2). next(2, 3). next(3, 4).
+even(0).
+odd(Y) :- even(X), next(X, Y).
+even(Y) :- odd(X), next(X, Y).
+?- even(X).
+?- odd(X).
+'''
+answers = [[[0], [2], [4]], [[1], [3]]]
+
+[[case]]
+name = "a constant in a recursive atom filters it"
+program = '''
+edge(a, b). edge(b, c). edge(x, y).
+path(X, Y) :- edge(X, Y).
+path(X, Z) :- path(X, Y), edge(Y, Z).
+from_a(Y) :- path(a, Y).
+?- from_a(Y).
+'''
+answers = [[["b"], ["c"]]]
+
+[[case]]
+name = "a rule may write a constant in its head"
+program = '''
+edge(a, b).
+kind(X, node) :- edge(X, _).
+kind(Y, node) :- edge(_, Y).
+?- kind(X, K).
+'''
+answers = [[["a", "node"], ["b", "node"]]]
+
+[[case]]
+name = "a rule may derive from a relation the host holds"
+held = { edge = [["a", "b"], ["b", "c"]] }
+program = '''
+path(X, Y) :- edge(X, Y).
+path(X, Z) :- path(X, Y), edge(Y, Z).
+?- path(a, Z).
+'''
+answers = [[["b"], ["c"]]]

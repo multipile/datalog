@@ -1,0 +1,12 @@
+[package]
+name = "datalog-syntax"
+description = "Datalog read: parsed, checked, and written back"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+# Nothing. Something that only reads programs takes this crate alone.
+[dependencies]

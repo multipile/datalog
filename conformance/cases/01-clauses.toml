@@ -1,0 +1,105 @@
+title = "Facts, rules and queries"
+readme = "Grammar"
+description = "A program is clauses: a fact, a rule, a query, or a named query. A query's answer has a column per variable it binds."
+
+[[case]]
+name = "an empty program asks nothing and answers nothing"
+program = ''
+answers = []
+
+[[case]]
+name = "a program of only comments is a program"
+program = '''
+% nothing here
+% and nothing here either
+'''
+answers = []
+
+[[case]]
+name = "a fact is a row of the relation it names"
+program = '''
+edge(a, b).
+edge(b, c).
+?- edge(X, Y).
+'''
+answers = [[["a", "b"], ["b", "c"]]]
+
+[[case]]
+name = "a rule derives rows from its body"
+program = '''
+edge(a, b). edge(b, c).
+two(X, Z) :- edge(X, Y), edge(Y, Z).
+?- two(X, Z).
+'''
+answers = [[["a", "c"]]]
+
+[[case]]
+name = "two rules for one head are a union"
+program = '''
+a(x). b(y).
+either(X) :- a(X).
+either(X) :- b(X).
+?- either(X).
+'''
+answers = [[["x"], ["y"]]]
+
+[[case]]
+name = "a query with no variable is answered by one empty row or none"
+program = '''
+ready.
+?- ready.
+?- edge(a, b).
+edge(c, d).
+'''
+answers = [[[]], []]
+
+[[case]]
+name = "a relation with no parentheses has no columns"
+program = '''
+ready.
+go :- ready.
+?- go.
+'''
+answers = [[[]]]
+
+[[case]]
+name = "every query in a program is answered, in the order written"
+program = '''
+n(1). n(2).
+?- n(X), X = 1.
+?- n(X).
+'''
+answers = [[[1]], [[1], [2]]]
+
+[[case]]
+name = "a named query asked as written is answered like any other"
+program = '''
+edge(a, b). edge(b, c).
+into(To) ?- edge(From, To).
+'''
+answers = [[["a", "b"], ["b", "c"]]]
+
+[[case]]
+name = "a named query's name is not a relation, so it may share a word with one"
+program = '''
+into(a).
+into(X) ?- into(X).
+'''
+answers = [[["a"]]]
+
+[[case]]
+name = "a body joins on the variables its atoms share"
+program = '''
+parent(ann, bob). parent(bob, cid). parent(bob, dan).
+grand(G, C) :- parent(G, P), parent(P, C).
+?- grand(G, C).
+'''
+answers = [[["ann", "cid"], ["ann", "dan"]]]
+
+[[case]]
+name = "a repeated variable in one atom filters it"
+program = '''
+edge(a, a). edge(a, b).
+?- edge(X, X).
+'''
+answers = [[["a"]]]

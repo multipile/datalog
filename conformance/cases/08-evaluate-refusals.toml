@@ -1,0 +1,37 @@
+title = "What evaluate refuses"
+readme = "Evaluating"
+description = "What depends on more than the text is refused by evaluate: relations nothing holds or defines, a wrong number of terms against what is held, a relation defined twice, and a reference the host names nothing for."
+
+[[case]]
+name = "a relation nothing holds or defines"
+program = '?- edge(X, Y).'
+refused = { stage = "evaluate", at = "1:4", says = "edge is no relation: nothing provides or defines it" }
+
+[[case]]
+name = "a relation written with a number of terms other than it is held with"
+held = { edge = [["a", "b"]] }
+program = '?- edge(X).'
+refused = { stage = "evaluate", at = "1:4", says = "edge has 2 columns and is written here with 1 column" }
+
+[[case]]
+name = "a relation the host holds is not defined again"
+held = { edge = [["a", "b"]] }
+program = 'edge(c, d).'
+refused = { stage = "evaluate", at = "1:1", says = "edge is the case's, and is not defined again" }
+
+[[case]]
+name = "a reference the host names nothing for"
+program = '''
+p(a).
+?- p(@missing).
+'''
+refused = { stage = "evaluate", at = "2:6", says = "the case names nothing @missing" }
+
+[[case]]
+name = "a reference is refused even where its clause would not matter"
+program = '''
+p(a).
+q(X) :- p(X), X = @missing.
+?- p(X).
+'''
+refused = { stage = "evaluate", says = "the case names nothing @missing" }

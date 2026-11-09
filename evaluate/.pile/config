@@ -1,0 +1,6 @@
+# What this subtree is. One property per line; # is a comment.
+# Committing this file is what carries the pile to a clone.
+kind = gitpile
+version = 1
+id = 3530e6e0819ada8ae0b9ce1c1f21d396
+name = evaluate

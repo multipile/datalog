@@ -1,0 +1,113 @@
+title = "Values and terms"
+readme = "Grammar"
+description = "A name and a string are one kind of value, an integer is another, _ matches anything, and @reference is the host's."
+
+[[case]]
+name = "a bare name and the same text quoted are one symbol"
+program = '''
+p(tree).
+?- p("tree").
+'''
+answers = [[[]]]
+
+[[case]]
+name = "quotes write a symbol that is not a name"
+program = '''
+p("a/b"). p("a b"). p("Capital").
+?- p(X).
+'''
+answers = [[["Capital"], ["a b"], ["a/b"]]]
+
+[[case]]
+name = "a string escapes a quote, a backslash, a newline and a tab"
+program = '''
+p("q\"b\\n\nt\t").
+?- p(X).
+'''
+answers = [[["q\"b\\n\nt\t"]]]
+
+[[case]]
+name = "an integer is not the symbol of its digits"
+program = '''
+p(1). p("1").
+?- p(1).
+?- p("1").
+?- p(X).
+'''
+answers = [[[]], [[]], [[1], ["1"]]]
+
+[[case]]
+name = "a negative integer is an integer"
+program = '''
+p(-3).
+?- p(X), X < 0.
+'''
+answers = [[[-3]]]
+
+[[case]]
+name = "the largest and smallest 64-bit integers are values"
+program = '''
+p(9223372036854775807). p(-9223372036854775808).
+?- p(X).
+'''
+answers = [[[-9223372036854775808], [9223372036854775807]]]
+
+[[case]]
+name = "_ matches anything and is matched with nothing else"
+program = '''
+edge(a, b). edge(c, c).
+?- edge(_, _).
+?- edge(X, _).
+'''
+answers = [[[]], [["a"], ["c"]]]
+
+[[case]]
+name = "_x is an ordinary variable, so two of them match"
+program = '''
+edge(a, b). edge(c, c).
+?- edge(_x, _x).
+'''
+answers = [[["c"]]]
+
+[[case]]
+name = "a reference is the value the host says it is"
+program = '''
+edge(a, b). edge(b, c).
+?- edge(@first, Y).
+'''
+references = { first = "a" }
+answers = [[["b"]]]
+
+[[case]]
+name = "a reference may name an integer"
+program = '''
+n(3). n(4).
+?- n(@three).
+'''
+references = { three = 3 }
+answers = [[[]]]
+
+[[case]]
+name = "a reference may hold a hyphen"
+program = '''
+p(lib).
+?- p(@my-lib).
+'''
+references = { my-lib = "lib" }
+answers = [[[]]]
+
+[[case]]
+name = "integers sort before symbols in an answer"
+program = '''
+w(b). w(10). w(2). w(a).
+?- w(X).
+'''
+answers = [[[2], [10], ["a"], ["b"]]]
+
+[[case]]
+name = "a host's integer matches the integer a program writes, and its symbol does not"
+held = { kept = [["logs", 30], ["traces", "30"]] }
+program = '''
+?- kept(T, 30).
+'''
+answers = [[["logs"]]]

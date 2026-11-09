@@ -1,0 +1,87 @@
+title = "Negation"
+readme = "Evaluating"
+description = "! before an atom keeps a binding no row matches. Negation is stratified: a relation is finished before anything negates it, and a negation inside its own recursion is refused."
+
+[[case]]
+name = "a negated atom keeps what no row matches"
+program = '''
+node(a). node(b). node(c).
+edge(a, b).
+?- node(X), !edge(X, _).
+'''
+answers = [[["b"], ["c"]]]
+
+[[case]]
+name = "a negated atom with every term bound is a filter"
+program = '''
+edge(a, b). edge(b, a). edge(b, c).
+?- edge(X, Y), !edge(Y, X).
+'''
+answers = [[["b", "c"]]]
+
+[[case]]
+name = "a negation of a recursive relation waits for its fixed point"
+program = '''
+node(a). node(b). node(c). node(d).
+edge(a, b). edge(b, c).
+reach(Y) :- edge(a, Y).
+reach(Z) :- reach(Y), edge(Y, Z).
+unreached(X) :- node(X), !reach(X).
+?- unreached(X).
+'''
+answers = [[["a"], ["d"]]]
+
+[[case]]
+name = "strata stack: a negation of a relation that itself negates"
+program = '''
+n(1). n(2). n(3).
+big(3).
+small(X) :- n(X), !big(X).
+not_small(X) :- n(X), !small(X).
+?- not_small(X).
+'''
+answers = [[[3]]]
+
+[[case]]
+name = "a negated relation of no columns is a condition on the whole rule"
+program = '''
+n(1).
+stopped.
+?- n(X), !stopped.
+?- n(X), !running.
+running :- n(5).
+'''
+answers = [[], [[1]]]
+
+[[case]]
+name = "a relation defined by its own negation is refused"
+program = '''
+n(a).
+p(X) :- n(X), !p(X).
+?- p(X).
+'''
+refused = { stage = "evaluate", at = "2:16", says = "p is negated inside its own recursion: p is defined by its own negation" }
+
+[[case]]
+name = "a negation through a longer cycle is refused, naming the relations"
+program = '''
+n(a).
+p(X) :- n(X), !q(X).
+q(X) :- p(X).
+?- p(X).
+'''
+refused = { stage = "evaluate", says = "is negated inside its own recursion" }
+
+[[case]]
+name = "a negated variable nothing else binds is refused"
+program = '''
+?- q(X), !r(Y).
+'''
+refused = { stage = "parse", at = "1:13", says = "Y is negated and no atom that is not negated binds it" }
+
+[[case]]
+name = "a body of only negations is refused"
+program = '''
+?- !q(a).
+'''
+refused = { stage = "parse", says = "a body needs an atom that is not negated" }

@@ -1,0 +1,14 @@
+# One workspace for the three crates, so they share one lock, one set of
+# dependency versions and one target/ to build into. Each crate still builds
+# and tests on its own, with `cargo test -p <crate>`.
+[workspace]
+resolver = "3"
+members = ["syntax", "evaluate", "conformance"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.98"
+license = "MIT"
+repository = "https://github.com/multipile/datalog"
+publish = false
