@@ -6,6 +6,11 @@ column it is at, and an evaluator on
 and queries, named queries, doc comments, negation, comparisons, integers,
 strings and `@reference`s that the host resolves. It has no aggregates.
 
+> [!NOTE]
+> **This Datalog is in early development.** The language and the crates' API can still
+> change from one commit to the next. Try it, and
+> [tell us what you find](https://github.com/multipile/datalog/issues).
+
 ```prolog
 path(X, Y) :- edge(X, Y).
 path(X, Z) :- path(X, Y), edge(Y, Z).
